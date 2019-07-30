@@ -177,7 +177,7 @@ const GamesAndTeamsParser = function(){
           if(currentDate){
             currentDateRowCount++;
             currentDateColCount = 0;
-            currentGame = {date: currentDate.format('MM/DD/YYYY')};
+            currentGame = {date: currentDate.format('M/D/YY')};
           }
 
           if(inSummary){

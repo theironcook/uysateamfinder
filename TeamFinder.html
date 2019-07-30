@@ -165,7 +165,7 @@
           tr.className = 'tr';
           table.appendChild(tr);
 
-          ['Games Played', 'Won', 'Lost', 'Tied', 'Goals For', 'Goals Against'].forEach( columnTitle => {
+          ['Games Played', 'Won', 'Lost', 'Tied', 'Goals For', 'For Per Game', 'Goals Against', 'Against Per Game'].forEach( columnTitle => {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
@@ -180,11 +180,20 @@
           tr.className = 'tr';
           table.appendChild(tr);
 
-          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 'goalsAgainst'].forEach( fieldName => {
+          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 'goalsForPerGame', 'goalsAgainst', 'goalsAgainstPerGame'].forEach( fieldName => {
+            let value = teamStats[fieldName];
+
+            if(fieldName === 'goalsForPerGame'){
+              value = (teamStats.goalsFor / teamStats.gameCount).toFixed(1);
+            }
+            else if(fieldName === 'goalsAgainstPerGame'){
+              value = (teamStats.goalsAgainst / teamStats.gameCount).toFixed(1);
+            }
+            
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
-            const text = document.createTextNode(teamStats[fieldName]);
+            const text = document.createTextNode(value);
             td.appendChild(text);
           });
         }
@@ -197,7 +206,8 @@
           statsDiv.appendChild(canvas);
           const context2d = canvas.getContext('2d');
           const dates = Object.keys(teamStats.timeline);
-          const chartData = {labels: dates, datasets: []};                        
+          const labels = dates.map(date => {return `${teamStats.timeline[date].opponentName} ${date}`;});
+          const chartData = {labels, datasets: []};                        
           
           [{label: 'Win (win=2,tie=1,loss=0', key: 'winStat', color: 'rgba(18, 185, 18, 0.8)'},
            {label: 'Goals', key: 'goalsFor', color: 'rgba(243, 243, 30, .8)'},
@@ -218,14 +228,14 @@
             type: 'line',
             data: chartData,            
             options: {
-              tooltips: {
-                custom: function(model){
-                  if(model.title && model.title.length > 0){                    
-                    const selectedDate = model.title[0];
-                    model.title[0] = `vs ${teamStats.timeline[selectedDate].opponentName}`;
-                  }
-                }
-              },
+              // tooltips: {
+              //   custom: function(model){
+              //     if(model.title && model.title.length > 0){                    
+              //       const selectedDate = model.title[0];
+              //       model.title[0] = `vs ${teamStats.timeline[selectedDate].opponentName}`;
+              //     }
+              //   }
+              // },
               scales: {
                 yAxes: [{
                   ticks: {
