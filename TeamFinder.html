@@ -49,26 +49,14 @@
           tr.className = 'tr';
           table.appendChild(tr);
 
-          // stats link
-          {
-            const td = document.createElement('td');
-            td.className = 'td';     
-            tr.appendChild(td);            
-            const a = document.createElement('a');
-            a.setAttribute('href', '#');
-            a.setAttribute('onclick', `showStats("${team.name}"); return false;`);
-            td.appendChild(a);
-            const text = document.createTextNode('stats');
-            a.appendChild(text);
-          }
-
           // name / schedule link
           {
             const td = document.createElement('td');
             td.className = 'td';    
             tr.appendChild(td);            
             const a = document.createElement('a');
-            a.setAttribute('href', `${baseUrl}${divisions[team.division].scheduleLink}`);
+            a.setAttribute('href', '#');
+            a.setAttribute('onclick', `showTeamStats("${team.name}"); return false;`);
             td.appendChild(a);
             const text = document.createTextNode(team.name);
             a.appendChild(text);
@@ -134,7 +122,7 @@
         statsDiv.innerHTML = '';
       }
 
-      function showStats(teamName){
+      function showTeamStats(teamName){
         const teamStats = teams[teamName].stats;
         const statsDiv = document.getElementById('stats');
         statsDiv.innerHTML = '';
@@ -292,7 +280,6 @@
         <table class="table">
           <thead>
             <tr>
-              <td>Stats</td>
               <td>Team</td>
               <td>Div. Rank</td>              
               <td>City</td>
