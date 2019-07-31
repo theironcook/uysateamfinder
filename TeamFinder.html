@@ -62,7 +62,41 @@
             a.appendChild(text);
           }
 
-          ['rank', 'city', 'teamID', 'coach'].forEach(fieldName => {
+          // division / bracket
+          {
+            const td = document.createElement('td');
+            td.className = 'td';
+            tr.appendChild(td);            
+            const a = document.createElement('a');
+            a.setAttribute('href', `${baseUrl}${divisions[team.division].bracketsLink}`);
+            td.appendChild(a);
+            const text = document.createTextNode(team.division);
+            a.appendChild(text);
+          }     
+
+          // rank
+          {
+            const td = document.createElement('td');
+            td.className = 'td';
+            tr.appendChild(td);
+            const text = document.createTextNode(team.rank);
+            td.appendChild(text);
+          }
+
+          // coach
+          {
+            const td = document.createElement('td');
+            td.className = 'td';    
+            tr.appendChild(td);            
+            const a = document.createElement('a');
+            a.setAttribute('href', '#');
+            a.setAttribute('onclick', `searchForCoach("${team.coach}"); return false;`);
+            td.appendChild(a);
+            const text = document.createTextNode(team.coach);
+            a.appendChild(text);
+          }
+
+          ['city', 'teamID'].forEach(fieldName => {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
@@ -85,19 +119,7 @@
               const text = document.createTextNode(primaryVenue.name);
               a.appendChild(text);
             }            
-          }
-
-          // bracket link
-          {
-            const td = document.createElement('td');
-            td.className = 'td';
-            tr.appendChild(td);            
-            const a = document.createElement('a');
-            a.setAttribute('href', `${baseUrl}${divisions[team.division].bracketsLink}`);
-            td.appendChild(a);
-            const text = document.createTextNode(team.division);
-            a.appendChild(text);
-          }                    
+          }               
         });        
       }
 
@@ -262,6 +284,10 @@
         return team.primaryVenue;
       }
 
+      function searchForCoach(coach){
+        location.hash=coach;
+      }
+
     </script>
   </head> 
 
@@ -281,12 +307,12 @@
           <thead>
             <tr>
               <td>Team</td>
-              <td>Div. Rank</td>              
+              <td>Division</td>
+              <td>Div. Rank</td>  
+              <td>Coach</td>            
               <td>City</td>
               <td>Team ID</td>
-              <td>Coach</td>
               <td>Primary Field</td>
-              <td>Division</td>
             </tr>
           </thead>
           <tbody id="searchResults">
