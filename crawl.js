@@ -223,21 +223,23 @@ const GamesAndTeamsParser = function(){
       if(inSummary){
         if(summaryColCount == 2 && text.length > 4){
           const teamName = text.substring(text.indexOf(':')+1).trim();
-          teams[teamName] = { name: teamName, 
-                              clubLink: currentTeamClubLink, 
-                              division: currentDivision, 
-                              rank: summaryRowCount, 
-                              stats: {
-                                homeVenueCounts: {}, 
-                                gameCount: 0, 
-                                winCount: 0, 
-                                lossCount: 0, 
-                                tieCount: 0, 
-                                goalsFor: 0, 
-                                goalsAgainst: 0,
-                                timeline: {}
-                              }};
-          console.log('Processing team ', teamName);
+          const divAndTeamName = `${currentDivision}:${teamName}`;
+          teams[divAndTeamName] = { name: teamName, 
+                                    divAndTeamName,
+                                    clubLink: currentTeamClubLink, 
+                                    division: currentDivision, 
+                                    rank: summaryRowCount, 
+                                    stats: {
+                                      homeVenueCounts: {}, 
+                                      gameCount: 0, 
+                                      winCount: 0, 
+                                      lossCount: 0, 
+                                      tieCount: 0, 
+                                      goalsFor: 0, 
+                                      goalsAgainst: 0,
+                                      timeline: {}
+                                  }};
+          console.log(`Processing team divTeamName=${divAndTeamName}`);
         }
       }
 
@@ -263,7 +265,7 @@ const GamesAndTeamsParser = function(){
               break;
 
             case 6:
-              currentGame.homeTeamName = text.replace(/&nbsp;/g, '').trim();
+              currentGame.homeTeamName = `${currentDivision}:${text.replace(/&nbsp;/g, '').trim()}`;
               break;
 
             case 7:
@@ -271,7 +273,7 @@ const GamesAndTeamsParser = function(){
               break;
             
             case 9:
-              currentGame.awayTeamName = text.replace(/&nbsp;/g, '').trim();
+              currentGame.awayTeamName = `${currentDivision}:${text.replace(/&nbsp;/g, '').trim()}`;
               break;
   
             case 10:
@@ -390,23 +392,22 @@ const VenuesParser = function(){
   for(let i = 0; i < divisionNames.length; i++){
     currentDivision = divisionNames[i];
     
+    console.log('Processing brackets and games for division: ', divisionNames[i]);
     (new BracketsParser()).parser.write((await axios.get(`${baseUrl}${divisions[currentDivision].bracketsLink}`)).data);
-    (new GamesAndTeamsParser()).parser.write((await axios.get(`${baseUrl}${divisions[currentDivision].scheduleLink}`)).data);
-    console.log('Processing division: ', divisionNames[i]);
+    (new GamesAndTeamsParser()).parser.write((await axios.get(`${baseUrl}${divisions[currentDivision].scheduleLink}`)).data);      
   }
 
   // Move the bracket team info to the team objects
   for(let i = 0; i < divisionNames.length; i++){
-    const division = divisions[divisionNames[i]];    
+    const division = divisions[divisionNames[i]];
 
     for(let j = 0; j < division.teams.length; j++){
-      const divTeam = division.teams[j];      
-
-      console.log('divTeam.name is ', divTeam.name, teams[divTeam.name] ? 'YES' : 'NO');
-      
-      teams[divTeam.name]['city'] = divTeam.city;
-      teams[divTeam.name]['teamID'] = divTeam.teamID;
-      teams[divTeam.name]['coach'] = divTeam.coach;
+      const team = division.teams[j]; // remember this team is not the same as the teams[] model
+      const divTeamName = `${divisionNames[i]}:${team.name}`;
+      console.log(`linking >${divTeamName}<`);
+      teams[divTeamName]['city'] = team.city;
+      teams[divTeamName]['teamID'] = team.teamID;
+      teams[divTeamName]['coach'] = team.coach;
     }
   }
 
@@ -414,12 +415,12 @@ const VenuesParser = function(){
   for(let i = 0; i < divisionNames.length; i++){
     const division = divisions[divisionNames[i]];    
     delete division.teams;
-  }
+  }  
 
   // Find all club names across all teams
-  const teamNames = Object.keys(teams);
-  for(let i = 0; i < teamNames.length; i++){
-    const team = teams[teamNames[i]];
+  const divisionTeamNames = Object.keys(teams);
+  for(let i = 0; i < divisionTeamNames.length; i++){
+    const team = teams[divisionTeamNames[i]];
     team.clubGuid = team.clubLink.match(/.*clubguid=([^&]+)/)[1];
 
     if(!clubNames[team.clubGuid]){
@@ -429,8 +430,8 @@ const VenuesParser = function(){
   }
 
   // Link the club name with the teams
-  for(let i = 0; i < teamNames.length; i++){
-    const team = teams[teamNames[i]];
+  for(let i = 0; i < divisionTeamNames.length; i++){
+    const team = teams[divisionTeamNames[i]];
     team.clubName = clubNames[team.clubGuid];
   }
 

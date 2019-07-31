@@ -56,7 +56,7 @@
             tr.appendChild(td);            
             const a = document.createElement('a');
             a.setAttribute('href', '#');
-            a.setAttribute('onclick', `showStats("${team.name}"); return false;`);
+            a.setAttribute('onclick', `showStats("${team.divAndTeamName}"); return false;`);
             td.appendChild(a);
             const text = document.createTextNode('stats');
             a.appendChild(text);
