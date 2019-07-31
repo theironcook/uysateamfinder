@@ -62,13 +62,13 @@
             a.appendChild(text);
           }
 
-          // division / bracket
+          // division / schedule
           {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);            
             const a = document.createElement('a');
-            a.setAttribute('href', `${baseUrl}${divisions[team.division].bracketsLink}`);
+            a.setAttribute('href', `${baseUrl}${divisions[team.division].scheduleLink}`);
             td.appendChild(a);
             const text = document.createTextNode(team.division);
             a.appendChild(text);

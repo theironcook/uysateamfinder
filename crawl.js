@@ -478,7 +478,7 @@ const VenuesParser = function(){
       awayTeam.stats.goalsFor += game.awayTeamScore;
       awayTeam.stats.goalsAgainst += game.homeTeamScore;
       
-      if(game.homeTeamScore === awayTeam.awayTeamScore){
+      if(game.homeTeamScore === game.awayTeamScore){
         homeTeam.stats.tieCount++;
         awayTeam.stats.tieCount++;
       }
