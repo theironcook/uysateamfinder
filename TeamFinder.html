@@ -19,7 +19,7 @@
       let searchResults;
 
       function findTeams(){              
-        location.hash = document.getElementById('teamQuery').value;
+        location.hash = `search=${document.getElementById('teamQuery').value}`;
       };
 
       function runSearch(searchQuery){        
@@ -29,7 +29,7 @@
         searchResults = _.filter(teams, team => {
           return _.every(teamQueryItems, (queryItem) => {
             return team.name.toUpperCase().includes(queryItem) ||
-                   (team.teamID && team.teamID.toUpperCase().includes(queryItem)) ||
+                   (team.teamID && team.clubName.toUpperCase().includes(queryItem)) ||
                    (team.city && team.city.toUpperCase().includes(queryItem)) ||
                    (team.coach && team.coach.toUpperCase().includes(queryItem))
           })
@@ -96,13 +96,23 @@
             a.appendChild(text);
           }
 
-          ['city', 'teamID'].forEach(fieldName => {
+          // club
+          {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
-            const text = document.createTextNode(team[fieldName]);
+            const text = document.createTextNode(team.clubName);
             td.appendChild(text);
-          });
+          }
+
+          // city
+          {
+            const td = document.createElement('td');
+            td.className = 'td';
+            tr.appendChild(td);
+            const text = document.createTextNode(team.city);
+            td.appendChild(text);
+          }
 
           // Primary field / address
           {
@@ -131,12 +141,22 @@
         });
 
         window.onhashchange = function(){
-          const searchInput = decodeURIComponent(location.hash.replace('#', ''));
+          const searchInput = getLocationHashValues()['search'] || '';
           runSearch(searchInput);
           document.getElementById('teamQuery').value = searchInput;
         }
         
         window.onhashchange();
+      }
+
+      function getLocationHashValues(){
+        const values = {};
+        location.hash.replace('#', '').split('&').forEach(pair => {
+          const pairVals = pair.split('=');
+          values[pairVals[0]] = decodeURIComponent(pairVals[1]);
+        });
+
+        return values;
       }
 
       function clearStats(){
@@ -285,7 +305,7 @@
       }
 
       function searchForCoach(coach){
-        location.hash=coach;
+        location.hash=`search=${coach}`;
       }
 
     </script>
@@ -298,7 +318,7 @@
           UYSA Team Finder
         </h1>
         <div>
-          <input class="input" id="teamQuery" type="text" placeholder="Search by team name, coach name, city or team id"/>
+          <input class="input" id="teamQuery" type="text" placeholder="Search for teams by name, coach, city or club name"/>
           <button class="button" onclick="findTeams()" style="margin-top: 10px;">Find teams!</button>
         </div>
         <hr>
@@ -310,8 +330,8 @@
               <td>Division</td>
               <td>Div. Rank</td>  
               <td>Coach</td>            
+              <td>Club</td>
               <td>City</td>
-              <td>Team ID</td>
               <td>Primary Field</td>
             </tr>
           </thead>
