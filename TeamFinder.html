@@ -24,6 +24,7 @@
 
       function runSearch(searchQuery){        
         const teamQuery = searchQuery.toUpperCase();
+        // Keep strings in "" or '' together as a whole search set
         teamQueryItems = teamQuery.match(/[^\s"']+|"([^"]*)"|'([^']*)'/g);
         if(teamQueryItems){
           teamQueryItems = teamQueryItems.map(s => s.replace(/\'/g, '').replace(/\"/g, ''));
@@ -67,7 +68,7 @@
             tr.appendChild(td);            
             const a = document.createElement('a');
             a.setAttribute('href', '#');
-            a.setAttribute('onclick', `showTeamStats("${team.divAndTeamName}"); return false;`);
+            a.setAttribute('onclick', `location.hash="search=${encodeURIComponent(`"${team.division}"`)}&teamStats=${team.divAndTeamName}"; return false;`);            
             td.appendChild(a);
             const text = document.createTextNode(team.name);
             a.appendChild(text);
@@ -107,7 +108,7 @@
             tr.appendChild(td);            
             const a = document.createElement('a');
             a.setAttribute('href', '#');
-            a.setAttribute('onclick', `showCoachStats("${team.coach}"); return false;`);
+            a.setAttribute('onclick', `location.hash="search=${team.coach}&coachStats=${team.coach}"; return false;`);
             td.appendChild(a);
             const text = document.createTextNode(team.coach);
             a.appendChild(text);
@@ -158,9 +159,15 @@
         });
 
         window.onhashchange = function(){
-          const searchInput = getLocationHashValues()['search'] || '';
+          const hashValues = getLocationHashValues();
+          const searchInput = hashValues['search'] || '';
           runSearch(searchInput);
           document.getElementById('teamQuery').value = searchInput;
+
+          if(hashValues['teamStats']){
+            console.log('going to show ', hashValues['teamStats']);
+            showTeamStats(hashValues['teamStats']);
+          }
         }
         
         window.onhashchange();
@@ -180,15 +187,16 @@
         document.getElementById('statsContainer').style.display = 'none';
       }
 
-      function showTeamStats(teamName){
+      function showTeamStats(divAndTeamName){
         document.getElementById('statsContainer').style.display = 'block';
-        const teamStats = teams[teamName].stats;
+        const teamName = divAndTeamName.split(':')[1];
+        const teamStats = teams[divAndTeamName].stats;
         const statsDiv = document.getElementById('stats');
         statsDiv.innerHTML = '';
 
         // team name
         {
-          document.getElementById('statsTitle').innerHTML = `${teamName} record: (placed ${teams[teamName].rank})`;
+          document.getElementById('statsTitle').innerHTML = `${teamName} record: (placed ${teams[divAndTeamName].rank})`;
         }
 
         const table = document.createElement('table');
@@ -242,7 +250,11 @@
           statsDiv.appendChild(canvas);
           const context2d = canvas.getContext('2d');
           const dates = Object.keys(teamStats.timeline);
-          const labels = dates.map(date => {return `${teamStats.timeline[date].opponentName} ${date}`;});
+          const labels = dates.map(date => {
+            const opponentDivAndTeamName = teamStats.timeline[date].opponentName;
+            const opponentName = opponentDivAndTeamName.split(':')[1];
+            return `Rank ${teams[opponentDivAndTeamName].rank} - ${opponentName} ${date}`;
+          });
           const chartData = {labels, datasets: []};                        
           
           [{label: 'Win (win=2,tie=1,loss=0', key: 'winStat', color: 'rgba(18, 185, 18, 0.8)'},
@@ -311,7 +323,7 @@
       }
 
       function showCoachStats(coach){
-        location.hash=`search="${coach}"&stats=coach`;
+        
       }
 
       function showDivisionStats(division){

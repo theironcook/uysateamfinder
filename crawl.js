@@ -463,6 +463,10 @@ const VenuesParser = function(){
       const homeTeam = teams[game.homeTeamName];
       const awayTeam = teams[game.awayTeamName];
 
+      if(game.homeTeamName === 'Boys 13U Division 2:AFC Apex 06 White'){
+        console.log('\n\n!!! game', game);
+      }
+
       if(!homeTeam.stats.homeVenueCounts[game.venueName]){
         homeTeam.stats.homeVenueCounts[game.venueName] = 1;
       }
@@ -488,6 +492,10 @@ const VenuesParser = function(){
         awayTeam.stats.lossCount++;
       }
       else {
+        if(game.homeTeamName === 'Boys 13U Division 2:AFC Apex 06 White'){
+          console.log(`\n\n!!! counted as loss. home_score>${game.homeTeamScore}< away_score>${game.awayTeamScore}< ===${game.homeTeamScore === game.awayTeamScore} ==${game.homeTeamScore == game.awayTeamScore}`);
+        }
+
         homeTeam.stats.lossCount++;
         awayTeam.stats.winCount++;
       }
