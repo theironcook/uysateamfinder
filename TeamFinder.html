@@ -187,6 +187,21 @@
         document.getElementById('statsContainer').style.display = 'none';
       }
 
+      function getRankString(rank){
+        if(rank === 1){
+          return '1st';
+        }
+        else if(rank === 2){
+          return '2nd';
+        }
+        else if(rank === 3){
+          return '3rd';
+        }
+        else {
+          return `${rank}th`;
+        }
+      }
+
       function showTeamStats(divAndTeamName){
         document.getElementById('statsContainer').style.display = 'block';
         const teamName = divAndTeamName.split(':')[1];
@@ -196,7 +211,7 @@
 
         // team name
         {
-          document.getElementById('statsTitle').innerHTML = `<b>${teamName}</b> &nbsp; (placed ${teams[divAndTeamName].rank})`;
+          document.getElementById('statsTitle').innerHTML = `<b>${teamName}</b> &nbsp; (placed ${getRankString(teams[divAndTeamName].rank)} in ${teams[divAndTeamName].division})`;
         }
 
         const table = document.createElement('table');
@@ -209,7 +224,7 @@
           tr.className = 'tr';
           table.appendChild(tr);
 
-          ['Games Played', 'Won', 'Lost', 'Tied', 'Goals For', 'For Per Game', 'Goals Against', 'Against Per Game'].forEach( columnTitle => {
+          ['Games', 'Won', 'Lost', 'Tied', 'Goals For', 'For Avg', 'Against', 'Against Avg', 'Goals Diff Avg', 'Improvement Wins', 'Imp. Goals', 'Imp. Against'].forEach( columnTitle => {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
@@ -223,15 +238,20 @@
           const tr = document.createElement('tr');
           tr.className = 'tr';
           table.appendChild(tr);
+          const goalsForAvg = (teamStats.goalsFor / teamStats.gameCount).toFixed(1);
+          const goalsAgainstAvg = (teamStats.goalsAgainst / teamStats.gameCount).toFixed(1);
 
-          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 'goalsForPerGame', 'goalsAgainst', 'goalsAgainstPerGame'].forEach( fieldName => {
+          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 'goalsForPerGame', 'goalsAgainst', 'goalsAgainstPerGame', 'goalsDiffPerGame'].forEach( fieldName => {
             let value = teamStats[fieldName];
 
             if(fieldName === 'goalsForPerGame'){
-              value = (teamStats.goalsFor / teamStats.gameCount).toFixed(1);
+              value = goalsForAvg;
             }
             else if(fieldName === 'goalsAgainstPerGame'){
-              value = (teamStats.goalsAgainst / teamStats.gameCount).toFixed(1);
+              value = goalsAgainstAvg;
+            }
+            else if(fieldName === 'goalsDiffPerGame'){
+              value = (goalsForAvg - goalsAgainstAvg).toFixed(2);
             }
             
             const td = document.createElement('td');
@@ -240,7 +260,50 @@
             const text = document.createTextNode(value);
             td.appendChild(text);
           });
-        }
+
+          // calc and report growth stats - based on how a team did against the same previous team
+          const gamesPerTeam = {};
+          for(let date in teamStats.timeline){
+            const game = teamStats.timeline[date];
+
+            if(!gamesPerTeam[game.opponentName]){
+              gamesPerTeam[game.opponentName] = [];
+            }
+            
+            gamesPerTeam[game.opponentName].push(game);
+          }
+
+          let winGrowth = 0, goalsForGrowth = 0, goalsAgainstGrowth = 0, hasMultipleGames = false;
+
+          for(let opponentName in gamesPerTeam){            
+            if(gamesPerTeam[opponentName].length > 1){              
+              hasMultipleGames = true;
+              let prevGame;
+
+              for(let gameCount = 0; gameCount < gamesPerTeam[opponentName].length; gameCount++){
+                const game = gamesPerTeam[opponentName][gameCount]; 
+                
+                if(prevGame){
+                  winGrowth += game.winStat - prevGame.winStat;
+                  goalsForGrowth += game.goalsFor - prevGame.goalsFor;
+                  goalsAgainstGrowth += game.goalsAgainst - prevGame.goalsAgainst; // reversed on purpose
+                }
+
+                prevGame = game;
+              }
+            }
+          }
+
+          if(hasMultipleGames){
+            [winGrowth, goalsForGrowth, goalsAgainstGrowth].forEach(growthValue => {
+              const td = document.createElement('td');
+              td.className = 'td';
+              tr.appendChild(td);
+              const text = document.createTextNode(growthValue);
+              td.appendChild(text);
+            });
+          }
+        }        
 
         // chart
         {
