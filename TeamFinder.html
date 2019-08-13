@@ -147,7 +147,36 @@
               const text = document.createTextNode(primaryVenue.name);
               a.appendChild(text);
             }            
-          }               
+          }
+          
+          if(team.stats.winGrowth !== 0 || team.stats.goalsForGrowth !== 0 || team.stats.goalsAgainstGrowth){
+            // improvement / growth score
+            {
+              const td = document.createElement('td');
+              td.className = 'td';
+              tr.appendChild(td);
+              const text = document.createTextNode(team.stats.winGrowth);
+              td.appendChild(text);
+            }
+
+            // improvement / growth for goals 
+            {
+              const td = document.createElement('td');
+              td.className = 'td';
+              tr.appendChild(td);
+              const text = document.createTextNode(team.stats.goalsForGrowth);
+              td.appendChild(text);
+            }
+
+            // improvement / growth for goals against 
+            {
+              const td = document.createElement('td');
+              td.className = 'td';
+              tr.appendChild(td);
+              const text = document.createTextNode(team.stats.goalsAgainstGrowth);
+              td.appendChild(text);
+            }
+          }
         });        
       }
 
@@ -241,7 +270,9 @@
           const goalsForAvg = (teamStats.goalsFor / teamStats.gameCount).toFixed(1);
           const goalsAgainstAvg = (teamStats.goalsAgainst / teamStats.gameCount).toFixed(1);
 
-          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 'goalsForPerGame', 'goalsAgainst', 'goalsAgainstPerGame', 'goalsDiffPerGame'].forEach( fieldName => {
+          ['gameCount', 'winCount', 'lossCount', 'tieCount', 'goalsFor', 
+           'goalsForPerGame', 'goalsAgainst', 'goalsAgainstPerGame', 'goalsDiffPerGame', 
+           'winGrowth', 'goalsForGrowth', 'goalsAgainstGrowth'].forEach( fieldName => {
             let value = teamStats[fieldName];
 
             if(fieldName === 'goalsForPerGame'){
@@ -259,50 +290,7 @@
             tr.appendChild(td);
             const text = document.createTextNode(value);
             td.appendChild(text);
-          });
-
-          // calc and report growth stats - based on how a team did against the same previous team
-          const gamesPerTeam = {};
-          for(let date in teamStats.timeline){
-            const game = teamStats.timeline[date];
-
-            if(!gamesPerTeam[game.opponentName]){
-              gamesPerTeam[game.opponentName] = [];
-            }
-            
-            gamesPerTeam[game.opponentName].push(game);
-          }
-
-          let winGrowth = 0, goalsForGrowth = 0, goalsAgainstGrowth = 0, hasMultipleGames = false;
-
-          for(let opponentName in gamesPerTeam){            
-            if(gamesPerTeam[opponentName].length > 1){              
-              hasMultipleGames = true;
-              let prevGame;
-
-              for(let gameCount = 0; gameCount < gamesPerTeam[opponentName].length; gameCount++){
-                const game = gamesPerTeam[opponentName][gameCount]; 
-                
-                if(prevGame){
-                  winGrowth += game.winStat - prevGame.winStat;
-                  goalsForGrowth += game.goalsFor - prevGame.goalsFor;
-                  goalsAgainstGrowth += game.goalsAgainst - prevGame.goalsAgainst; // reversed on purpose
-                }
-
-                prevGame = game;
-              }
-            }
-          }
-
-          if(hasMultipleGames){
-            [winGrowth, goalsForGrowth, goalsAgainstGrowth].forEach(growthValue => {
-              const td = document.createElement('td');
-              td.className = 'td';
-              tr.appendChild(td);
-              const text = document.createTextNode(growthValue);
-              td.appendChild(text);
-            });
-          }
+          });          
         }        
 
         // chart
@@ -400,10 +388,10 @@
   <body class="">
     <section class="section">
       <div class="container">
-        <h1 class="title">
-          UYSA Team Finder
+        <h1 class="title ">
+          UYSA Team Finder <span style="font-size: 12px">data from 2018-2019 seasons</span>
         </h1>
-        <div>
+        <div>            
           <input id="teamQuery" class="input" type="text" placeholder="Search for teams by name, coach, city, club or division name"/>
           <div class="level-left" style="margin-top: 10px;">
             <button class="button level-item" onclick="findTeams()">Find teams!</button>
@@ -436,6 +424,9 @@
               <td>Club</td>
               <td>City</td>
               <td>Primary Field</td>
+              <td>Improve Score</td>
+              <td>Imp Goals</td>
+              <td>Imp Against</td>
             </tr>
           </thead>
           <tbody id="searchResults">

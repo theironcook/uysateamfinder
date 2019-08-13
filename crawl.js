@@ -463,10 +463,6 @@ const VenuesParser = function(){
       const homeTeam = teams[game.homeTeamName];
       const awayTeam = teams[game.awayTeamName];
 
-      if(game.homeTeamName === 'Boys 13U Division 2:AFC Apex 06 White'){
-        console.log('\n\n!!! game', game);
-      }
-
       if(!homeTeam.stats.homeVenueCounts[game.venueName]){
         homeTeam.stats.homeVenueCounts[game.venueName] = 1;
       }
@@ -491,11 +487,7 @@ const VenuesParser = function(){
         homeTeam.stats.winCount++;
         awayTeam.stats.lossCount++;
       }
-      else {
-        if(game.homeTeamName === 'Boys 13U Division 2:AFC Apex 06 White'){
-          console.log(`\n\n!!! counted as loss. home_score>${game.homeTeamScore}< away_score>${game.awayTeamScore}< ===${game.homeTeamScore === game.awayTeamScore} ==${game.homeTeamScore == game.awayTeamScore}`);
-        }
-
+      else {        
         homeTeam.stats.lossCount++;
         awayTeam.stats.winCount++;
       }
@@ -521,6 +513,46 @@ const VenuesParser = function(){
     catch(err){
       console.error(`Error processing game: ${JSON.stringify(game)}`, err);
     }
+  }
+
+  // calculate improvement scores
+  for(let teamAndDivName in teams){
+    const teamStats = teams[teamAndDivName].stats;    
+    const gamesPerTeam = {};
+    for(let date in teamStats.timeline){
+      const game = teamStats.timeline[date];
+
+      if(!gamesPerTeam[game.opponentName]){
+        gamesPerTeam[game.opponentName] = [];
+      }
+      
+      gamesPerTeam[game.opponentName].push(game);
+    }
+
+    let winGrowth = 0, goalsForGrowth = 0, goalsAgainstGrowth = 0;
+
+    for(let opponentName in gamesPerTeam){            
+      if(gamesPerTeam[opponentName].length > 1){              
+        hasMultipleGames = true;
+        let prevGame;
+
+        for(let gameCount = 0; gameCount < gamesPerTeam[opponentName].length; gameCount++){
+          const game = gamesPerTeam[opponentName][gameCount]; 
+          
+          if(prevGame){
+            winGrowth += game.winStat - prevGame.winStat;
+            goalsForGrowth += game.goalsFor - prevGame.goalsFor;
+            goalsAgainstGrowth += game.goalsAgainst - prevGame.goalsAgainst;
+          }
+
+          prevGame = game;
+        }
+      }
+    }
+
+    teamStats.winGrowth = winGrowth;
+    teamStats.goalsForGrowth = goalsForGrowth;
+    teamStats.goalsAgainstGrowth = goalsAgainstGrowth;
   }
   
   fs.writeFileSync('teams.json', JSON.stringify(teams));
