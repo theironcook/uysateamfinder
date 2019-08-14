@@ -150,7 +150,7 @@
           }
           
           if(team.stats.winGrowth !== 0 || team.stats.goalsForGrowth !== 0 || team.stats.goalsAgainstGrowth){
-            // improvement / growth score
+            // trending / winGrowth
             {
               const td = document.createElement('td');
               td.className = 'td';
@@ -159,7 +159,7 @@
               td.appendChild(text);
             }
 
-            // improvement / growth for goals 
+            // trending goals
             {
               const td = document.createElement('td');
               td.className = 'td';
@@ -168,7 +168,7 @@
               td.appendChild(text);
             }
 
-            // improvement / growth for goals against 
+            // trending goals against
             {
               const td = document.createElement('td');
               td.className = 'td';
@@ -253,7 +253,7 @@
           tr.className = 'tr';
           table.appendChild(tr);
 
-          ['Games', 'Won', 'Lost', 'Tied', 'Goals For', 'For Avg', 'Against', 'Against Avg', 'Goals Diff Avg', 'Improvement Score', 'Imp. Goals', 'Imp. Against'].forEach( columnTitle => {
+          ['Games', 'Won', 'Lost', 'Tied', 'Goals For', 'For Avg', 'Against', 'Against Avg', 'Goals Diff Avg', 'Trending', 'Goals', 'Against'].forEach( columnTitle => {
             const td = document.createElement('td');
             td.className = 'td';
             tr.appendChild(td);
@@ -424,9 +424,9 @@
               <td>Club</td>
               <td>City</td>
               <td>Primary Field</td>
-              <td>Improve Score</td>
-              <td>Imp Goals</td>
-              <td>Imp Against</td>
+              <td>Trending</td>
+              <td>Goals</td>
+              <td>Against</td>
             </tr>
           </thead>
           <tbody id="searchResults">
