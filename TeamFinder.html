@@ -17,7 +17,7 @@
 
       // log hash changes
       window.addEventListener('hashchange', function(){
-        console.log('new href ', location.href);
+        // store entire url including hash in analytics        
         gtag('config', analyticsId, {'page_path': location.href});
       });
     </script>
